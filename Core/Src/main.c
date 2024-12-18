@@ -22,7 +22,21 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#define USE_SPI_MODULE (0)
+#define USE_LCD_MODULE (0)
+#define USE_ESP8266    (0)
 
+#include "bme280.h"
+#include "mcp23s17.h"
+#if (USE_SPI_MODULE == 1)
+#include "spi_module.h"
+#endif
+#include "nrf24l01.h"
+#include "lcd_char.h"
+#include "flash.h"
+#include "esp8266_at.h"
+#include <string.h>
+#include "max7219.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,7 +51,10 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+#define ESP_UART_DMA_BUFFER_SIZE 512u
+#define ESP_RX_BUFFER_SIZE       2048u
 
+#define ESP_EVENT_FLAG_MASK   0x00000001uL
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -59,6 +76,38 @@ osThreadId myTask02Handle;
 uint32_t myTask02Buffer[ 128 ];
 osStaticThreadDef_t myTask02ControlBlock;
 /* USER CODE BEGIN PV */
+volatile uint16_t ADC_RawData[6u] = {0u};
+float ADC_Voltage[6u];
+
+NRF24L01_Handler_t RFHandler =
+{
+  .ptrHSpi = &hspi1,
+  .portCS  = CS_NRF24L01_GPIO_Port,
+  .pinCS   = CS_NRF24L01_Pin,
+  .portCE  = CE_NRF24L01_GPIO_Port,
+  .pinCE   = CE_NRF24L01_Pin
+};
+
+FLASH_Handler_t FlashHandler =
+{
+  .ptrHSpi = &hspi1,
+  .portCS  = CS_FLASH_GPIO_Port,
+  .pinCS   = CS_FLASH_Pin
+};
+
+MAX7219_Handler_t LedDriverHandler =
+{
+  .ptrHSpi = &hspi1,
+};
+
+char EspDmaBuffer[ESP_UART_DMA_BUFFER_SIZE];
+char EspRxBuffer[ESP_RX_BUFFER_SIZE];
+
+uint16_t oldPos = 0;
+uint16_t newPos = 0;
+
+bool  ESP_ResponseOK = 0u;
+bool  ESP_MessageReceived = false;
 
 /* USER CODE END PV */
 
@@ -123,7 +172,27 @@ int main(void)
   MX_USB_PCD_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_Delay(1u);
+  // Start PWM
+  //HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  BME280_Detect();
+  BME280_StartMeasurement(Oversampling1, Oversampling1, Oversampling1);
+  FLASH_Identification(&FlashHandler);
+  NRF24L01_Init(&RFHandler);
+#if (USE_SPI_MODULE == 1)
+  SPIMODULE_Init(&hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin );
+#endif
+#if (USE_SPI_LCD == 1)
+  // Init LCD
+  LcdInit_MSP23S17(LCD_DISP_ON_CURSOR_BLINK, &hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin);
+  LcdPuts("Hello_MCP23S17", 0, 0);
+#endif
+#if (USE_ESP8266 == 1)
+  ESP8266_Init(&huart1, EspRxBuffer);
+  HAL_Delay(10u);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
+  __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+#endif
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
