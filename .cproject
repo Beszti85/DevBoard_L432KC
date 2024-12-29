@@ -77,18 +77,13 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1785011813" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1935987070.134491260" name="lcd_6pin_pcf8574.c" rcbsApplicability="disable" resourcePath="ChipDrivers/Src/lcd_6pin_pcf8574.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.714007017.1569889717">
-						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.714007017.1569889717" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.714007017">
-							<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.64489448" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
-						</tool>
-					</fileInfo>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1935987070.673398510" name="lcd_6pin_port.h" rcbsApplicability="disable" resourcePath="ChipDrivers/Inc/lcd_6pin_port.h" toolsToInvoke=""/>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1935987070.1851348267" name="lcd_6pin_io.h" rcbsApplicability="disable" resourcePath="ChipDrivers/Inc/lcd_6pin_io.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="Src/lcd_6pin_pcf8574.c|Src/lcd_6pin_mcp23s17.c|Src/lcd_6pin_io.c|Inc/lcd_6pin_io.h|Src/lcd_char.c|Inc/lcd_6pin_port.h" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ChipDrivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
