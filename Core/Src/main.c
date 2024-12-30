@@ -68,12 +68,12 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
-osThreadId defaultTaskHandle;
-uint32_t defaultTaskBuffer[ 128 ];
-osStaticThreadDef_t defaultTaskControlBlock;
-osThreadId myTask02Handle;
-uint32_t myTask02Buffer[ 128 ];
-osStaticThreadDef_t myTask02ControlBlock;
+osThreadId Task100msHandle;
+uint32_t Task100msBuffer[ 128 ];
+osStaticThreadDef_t Task100msControlBlock;
+osThreadId Task1secHandle;
+uint32_t Task1secBuffer[ 128 ];
+osStaticThreadDef_t Task1secControlBlock;
 /* USER CODE BEGIN PV */
 volatile uint16_t ADC_RawData[6u] = {0u};
 float ADC_Voltage[6u];
@@ -119,11 +119,10 @@ static void MX_SPI1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_ADC1_Init(void);
-void StartDefaultTask(void const * argument);
-void StartTask02(void const * argument);
+void StartTask100ms(void const * argument);
+void StartTask1sec(void const * argument);
 
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -207,13 +206,13 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  osThreadStaticDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128, defaultTaskBuffer, &defaultTaskControlBlock);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* definition and creation of Task100ms */
+  osThreadStaticDef(Task100ms, StartTask100ms, osPriorityNormal, 0, 128, Task100msBuffer, &Task100msControlBlock);
+  Task100msHandle = osThreadCreate(osThread(Task100ms), NULL);
 
-  /* definition and creation of myTask02 */
-  osThreadStaticDef(myTask02, StartTask02, osPriorityIdle, 0, 128, myTask02Buffer, &myTask02ControlBlock);
-  myTask02Handle = osThreadCreate(osThread(myTask02), NULL);
+  /* definition and creation of Task1sec */
+  osThreadStaticDef(Task1sec, StartTask1sec, osPriorityIdle, 0, 128, Task1secBuffer, &Task1secControlBlock);
+  Task1secHandle = osThreadCreate(osThread(Task1sec), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -579,40 +578,47 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartTask100ms */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the Task100ms thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+/* USER CODE END Header_StartTask100ms */
+void StartTask100ms(void const * argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    // Convert ADC raw data from last running
+    for( uint16_t i = 0u; i < 6u; i++ )
+    {
+      ADC_Voltage[i] = (float)ADC_RawData[i] * 3.3f / 4096.0f;
+    }
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_RawData[0u], 6u);
+    osDelay(100);
   }
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_StartTask02 */
+/* USER CODE BEGIN Header_StartTask1sec */
 /**
-* @brief Function implementing the myTask02 thread.
+* @brief Function implementing the Task1sec thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTask02 */
-void StartTask02(void const * argument)
+/* USER CODE END Header_StartTask1sec */
+void StartTask1sec(void const * argument)
 {
-  /* USER CODE BEGIN StartTask02 */
+  /* USER CODE BEGIN StartTask1sec */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    BME280_ReadMeasResult();
+    osDelay(1000);
   }
-  /* USER CODE END StartTask02 */
+  /* USER CODE END StartTask1sec */
 }
 
 /**
