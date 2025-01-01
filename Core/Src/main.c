@@ -615,6 +615,7 @@ void StartTask1sec(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+	HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
     BME280_ReadMeasResult();
     osDelay(1000);
   }
