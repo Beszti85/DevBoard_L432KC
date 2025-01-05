@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 #define USE_SPI_MODULE (0)
 #define USE_LCD_MODULE (0)
-#define USE_ESP8266    (0)
+#define USE_ESP8266    (1)
 
 #include "bme280.h"
 #include "mcp23s17.h"
@@ -40,6 +40,8 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticEventGroup_t osStaticEventGroupDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -69,12 +71,50 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart1_rx;
 
-osThreadId Task100msHandle;
+/* Definitions for Task100ms */
+osThreadId_t Task100msHandle;
 uint32_t Task100msBuffer[ 128 ];
 osStaticThreadDef_t Task100msControlBlock;
-osThreadId Task1secHandle;
+const osThreadAttr_t Task100ms_attributes = {
+  .name = "Task100ms",
+  .cb_mem = &Task100msControlBlock,
+  .cb_size = sizeof(Task100msControlBlock),
+  .stack_mem = &Task100msBuffer[0],
+  .stack_size = sizeof(Task100msBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Task1sec */
+osThreadId_t Task1secHandle;
 uint32_t Task1secBuffer[ 128 ];
 osStaticThreadDef_t Task1secControlBlock;
+const osThreadAttr_t Task1sec_attributes = {
+  .name = "Task1sec",
+  .cb_mem = &Task1secControlBlock,
+  .cb_size = sizeof(Task1secControlBlock),
+  .stack_mem = &Task1secBuffer[0],
+  .stack_size = sizeof(Task1secBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for TaskEspReceive */
+osThreadId_t TaskEspReceiveHandle;
+uint32_t TaskEspReceiveBuffer[ 128 ];
+osStaticThreadDef_t TaskEspReceiveControlBlock;
+const osThreadAttr_t TaskEspReceive_attributes = {
+  .name = "TaskEspReceive",
+  .cb_mem = &TaskEspReceiveControlBlock,
+  .cb_size = sizeof(TaskEspReceiveControlBlock),
+  .stack_mem = &TaskEspReceiveBuffer[0],
+  .stack_size = sizeof(TaskEspReceiveBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for eventEspReceive */
+osEventFlagsId_t eventEspReceiveHandle;
+osStaticEventGroupDef_t myEvent01ControlBlock;
+const osEventFlagsAttr_t eventEspReceive_attributes = {
+  .name = "eventEspReceive",
+  .cb_mem = &myEvent01ControlBlock,
+  .cb_size = sizeof(myEvent01ControlBlock),
+};
 /* USER CODE BEGIN PV */
 volatile uint16_t ADC_RawData[4u] = {0u};
 float ADC_Voltage[4u];
@@ -120,10 +160,60 @@ static void MX_SPI1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_ADC1_Init(void);
-void StartTask100ms(void const * argument);
-void StartTask1sec(void const * argument);
+void StartTask100ms(void *argument);
+void StartTask1sec(void *argument);
+void StartTaskEspReceive(void *argument);
 
 /* USER CODE BEGIN PFP */
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+  ESP_ResponseOK = false;
+  if (huart->Instance == USART1)
+  {
+    /* Check if it is an OK: dont need to copy, just set the acknowledge flag  */
+    if( strncmp(EspDmaBuffer, "\r\nOK\r\n", 6) )
+    {
+      ESP_ResponseOK = true;
+    }
+    else
+    {
+      oldPos = newPos;  // Update the last position before copying new data
+
+      /* If the data in large and it is about to exceed the buffer size, we have to route it to the start of the buffer
+       * This is to maintain the circular buffer
+       * The old data in the main buffer will be overlapped
+       */
+      if (oldPos+Size > ESP_RX_BUFFER_SIZE)  // If the current position + new data size is greater than the main buffer
+      {
+        uint16_t datatocopy = ESP_RX_BUFFER_SIZE-oldPos;  // find out how much space is left in the main buffer
+        memcpy ((uint8_t *)EspRxBuffer+oldPos, EspDmaBuffer, datatocopy);  // copy data in that remaining space
+
+        oldPos = 0;  // point to the start of the buffer
+        memcpy ((uint8_t *)EspRxBuffer, (uint8_t *)EspDmaBuffer+datatocopy, (Size-datatocopy));  // copy the remaining data
+        newPos = (Size-datatocopy);  // update the position
+      }
+
+      /* if the current position + new data size is less than the main buffer
+       * we will simply copy the data into the buffer and update the position
+       */
+      else
+      {
+        memcpy ((uint8_t *)EspRxBuffer+oldPos, EspDmaBuffer, Size);
+        newPos = Size+oldPos;
+      }
+    }
+
+    /* start the DMA again */
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *) EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
+    __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+
+    if( ESP_ResponseOK == false )
+    {
+      ESP_MessageReceived = true;
+      osEventFlagsSet(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK);
+    }
+  }
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -190,6 +280,9 @@ int main(void)
 #endif
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -207,17 +300,26 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of Task100ms */
-  osThreadStaticDef(Task100ms, StartTask100ms, osPriorityNormal, 0, 128, Task100msBuffer, &Task100msControlBlock);
-  Task100msHandle = osThreadCreate(osThread(Task100ms), NULL);
+  /* creation of Task100ms */
+  Task100msHandle = osThreadNew(StartTask100ms, NULL, &Task100ms_attributes);
 
-  /* definition and creation of Task1sec */
-  osThreadStaticDef(Task1sec, StartTask1sec, osPriorityIdle, 0, 128, Task1secBuffer, &Task1secControlBlock);
-  Task1secHandle = osThreadCreate(osThread(Task1sec), NULL);
+  /* creation of Task1sec */
+  Task1secHandle = osThreadNew(StartTask1sec, NULL, &Task1sec_attributes);
+
+  /* creation of TaskEspReceive */
+  TaskEspReceiveHandle = osThreadNew(StartTaskEspReceive, NULL, &TaskEspReceive_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of eventEspReceive */
+  eventEspReceiveHandle = osEventFlagsNew(&eventEspReceive_attributes);
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
   osKernelStart();
@@ -617,7 +719,7 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartTask100ms */
-void StartTask100ms(void const * argument)
+void StartTask100ms(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
@@ -641,7 +743,7 @@ void StartTask100ms(void const * argument)
 * @retval None
 */
 /* USER CODE END Header_StartTask1sec */
-void StartTask1sec(void const * argument)
+void StartTask1sec(void *argument)
 {
   /* USER CODE BEGIN StartTask1sec */
   /* Infinite loop */
@@ -652,6 +754,32 @@ void StartTask1sec(void const * argument)
     osDelay(1000);
   }
   /* USER CODE END StartTask1sec */
+}
+
+/* USER CODE BEGIN Header_StartTaskEspReceive */
+/**
+* @brief Function implementing the TaskEspReceive thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTaskEspReceive */
+void StartTaskEspReceive(void *argument)
+{
+  /* USER CODE BEGIN StartTaskEspReceive */
+  uint32_t eventFlags = 0u;
+  /* Infinite loop */
+  for(;;)
+  {
+    eventFlags = osEventFlagsWait(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK, osFlagsWaitAny, osWaitForever);
+    if( eventFlags == ESP_EVENT_FLAG_MASK )
+    {
+      // Process the incoming data that is not OK
+      ESP8266_AtReportHandler(EspRxBuffer);
+      osEventFlagsClear(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK);
+    }
+    osDelay(1);
+  }
+  /* USER CODE END StartTaskEspReceive */
 }
 
 /**
