@@ -70,6 +70,7 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* Definitions for Task100ms */
 osThreadId_t Task100msHandle;
@@ -114,6 +115,14 @@ const osEventFlagsAttr_t eventEspReceive_attributes = {
   .name = "eventEspReceive",
   .cb_mem = &myEvent01ControlBlock,
   .cb_size = sizeof(myEvent01ControlBlock),
+};
+/* Definitions for eventVcpReceive */
+osEventFlagsId_t eventVcpReceiveHandle;
+osStaticEventGroupDef_t myEvent02ControlBlock;
+const osEventFlagsAttr_t eventVcpReceive_attributes = {
+  .name = "eventVcpReceive",
+  .cb_mem = &myEvent02ControlBlock,
+  .cb_size = sizeof(myEvent02ControlBlock),
 };
 /* USER CODE BEGIN PV */
 volatile uint16_t ADC_RawData[4u] = {0u};
@@ -316,6 +325,9 @@ int main(void)
   /* Create the event(s) */
   /* creation of eventEspReceive */
   eventEspReceiveHandle = osEventFlagsNew(&eventEspReceive_attributes);
+
+  /* creation of eventVcpReceive */
+  eventVcpReceiveHandle = osEventFlagsNew(&eventVcpReceive_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -657,6 +669,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 
 }
 

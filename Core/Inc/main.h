@@ -58,6 +58,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define ESP_EVENT_FLAG_MASK 0x00000001
+#define VPC_EVENT_FLAG_MASK 0x00000002
 #define VCP_TX_Pin GPIO_PIN_2
 #define VCP_TX_GPIO_Port GPIOA
 #define CS_NRF24L01_Pin GPIO_PIN_4
