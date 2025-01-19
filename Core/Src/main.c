@@ -96,33 +96,25 @@ const osThreadAttr_t Task1sec_attributes = {
   .stack_size = sizeof(Task1secBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for TaskEspReceive */
-osThreadId_t TaskEspReceiveHandle;
-uint32_t TaskEspReceiveBuffer[ 128 ];
-osStaticThreadDef_t TaskEspReceiveControlBlock;
-const osThreadAttr_t TaskEspReceive_attributes = {
-  .name = "TaskEspReceive",
-  .cb_mem = &TaskEspReceiveControlBlock,
-  .cb_size = sizeof(TaskEspReceiveControlBlock),
-  .stack_mem = &TaskEspReceiveBuffer[0],
-  .stack_size = sizeof(TaskEspReceiveBuffer),
+/* Definitions for TaskComm */
+osThreadId_t TaskCommHandle;
+uint32_t TaskCommBuffer[ 256 ];
+osStaticThreadDef_t TaskCommControlBlock;
+const osThreadAttr_t TaskComm_attributes = {
+  .name = "TaskComm",
+  .cb_mem = &TaskCommControlBlock,
+  .cb_size = sizeof(TaskCommControlBlock),
+  .stack_mem = &TaskCommBuffer[0],
+  .stack_size = sizeof(TaskCommBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for eventEspReceive */
-osEventFlagsId_t eventEspReceiveHandle;
+/* Definitions for EventComTask */
+osEventFlagsId_t EventComTaskHandle;
 osStaticEventGroupDef_t myEvent01ControlBlock;
-const osEventFlagsAttr_t eventEspReceive_attributes = {
-  .name = "eventEspReceive",
+const osEventFlagsAttr_t EventComTask_attributes = {
+  .name = "EventComTask",
   .cb_mem = &myEvent01ControlBlock,
   .cb_size = sizeof(myEvent01ControlBlock),
-};
-/* Definitions for eventVcpReceive */
-osEventFlagsId_t eventVcpReceiveHandle;
-osStaticEventGroupDef_t myEvent02ControlBlock;
-const osEventFlagsAttr_t eventVcpReceive_attributes = {
-  .name = "eventVcpReceive",
-  .cb_mem = &myEvent02ControlBlock,
-  .cb_size = sizeof(myEvent02ControlBlock),
 };
 /* USER CODE BEGIN PV */
 volatile uint16_t ADC_RawData[4u] = {0u};
@@ -171,7 +163,7 @@ static void MX_I2C1_Init(void);
 static void MX_ADC1_Init(void);
 void StartTask100ms(void *argument);
 void StartTask1sec(void *argument);
-void StartTaskEspReceive(void *argument);
+void StartTaskComm(void *argument);
 
 /* USER CODE BEGIN PFP */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
@@ -219,7 +211,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     if( ESP_ResponseOK == false )
     {
       ESP_MessageReceived = true;
-      osEventFlagsSet(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK);
+      osEventFlagsSet(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
   }
 }
@@ -315,19 +307,16 @@ int main(void)
   /* creation of Task1sec */
   Task1secHandle = osThreadNew(StartTask1sec, NULL, &Task1sec_attributes);
 
-  /* creation of TaskEspReceive */
-  TaskEspReceiveHandle = osThreadNew(StartTaskEspReceive, NULL, &TaskEspReceive_attributes);
+  /* creation of TaskComm */
+  TaskCommHandle = osThreadNew(StartTaskComm, NULL, &TaskComm_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Create the event(s) */
-  /* creation of eventEspReceive */
-  eventEspReceiveHandle = osEventFlagsNew(&eventEspReceive_attributes);
-
-  /* creation of eventVcpReceive */
-  eventVcpReceiveHandle = osEventFlagsNew(&eventVcpReceive_attributes);
+  /* creation of EventComTask */
+  EventComTaskHandle = osEventFlagsNew(&EventComTask_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -771,30 +760,30 @@ void StartTask1sec(void *argument)
   /* USER CODE END StartTask1sec */
 }
 
-/* USER CODE BEGIN Header_StartTaskEspReceive */
+/* USER CODE BEGIN Header_StartTaskComm */
 /**
-* @brief Function implementing the TaskEspReceive thread.
+* @brief Function implementing the TaskComm thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTaskEspReceive */
-void StartTaskEspReceive(void *argument)
+/* USER CODE END Header_StartTaskComm */
+void StartTaskComm(void *argument)
 {
-  /* USER CODE BEGIN StartTaskEspReceive */
+  /* USER CODE BEGIN StartTaskComm */
   uint32_t eventFlags = 0u;
   /* Infinite loop */
   for(;;)
   {
-    eventFlags = osEventFlagsWait(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK, osFlagsWaitAny, osWaitForever);
+    eventFlags = osEventFlagsWait(EventComTaskHandle, ESP_EVENT_FLAG_MASK, osFlagsWaitAny, osWaitForever);
     if( eventFlags == ESP_EVENT_FLAG_MASK )
     {
       // Process the incoming data that is not OK
       ESP8266_AtReportHandler(EspRxBuffer);
-      osEventFlagsClear(eventEspReceiveHandle, ESP_EVENT_FLAG_MASK);
+      osEventFlagsClear(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
     osDelay(1);
   }
-  /* USER CODE END StartTaskEspReceive */
+  /* USER CODE END StartTaskComm */
 }
 
 /**
