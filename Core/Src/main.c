@@ -774,12 +774,17 @@ void StartTaskComm(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    eventFlags = osEventFlagsWait(EventComTaskHandle, ESP_EVENT_FLAG_MASK, osFlagsWaitAny, osWaitForever);
-    if( eventFlags == ESP_EVENT_FLAG_MASK )
+    eventFlags = osEventFlagsWait(EventComTaskHandle, ESP_EVENT_FLAG_MASK | VCP_EVENT_FLAG_MASK, osFlagsWaitAny, osWaitForever);
+    if( eventFlags |= ESP_EVENT_FLAG_MASK )
     {
       // Process the incoming data that is not OK
       ESP8266_AtReportHandler(EspRxBuffer);
       osEventFlagsClear(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
+    }
+    if( eventFlags |= VCP_EVENT_FLAG_MASK)
+    {
+      // Process the incoming frame from PC
+      osEventFlagsClear(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
     }
     osDelay(1);
   }
