@@ -53,10 +53,11 @@ typedef StaticEventGroup_t osStaticEventGroupDef_t;
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+#define VCOM_UART_DMA_BUFFER_SIZE 256u
+
 #define ESP_UART_DMA_BUFFER_SIZE 512u
 #define ESP_RX_BUFFER_SIZE       2048u
 
-#define ESP_EVENT_FLAG_MASK   0x00000001uL
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -141,6 +142,8 @@ MAX7219_Handler_t LedDriverHandler =
   .ptrHSpi = &hspi1,
 };
 
+char VComDmaBuffer[VCOM_UART_DMA_BUFFER_SIZE];
+
 char EspDmaBuffer[ESP_UART_DMA_BUFFER_SIZE];
 char EspRxBuffer[ESP_RX_BUFFER_SIZE];
 
@@ -214,6 +217,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
       osEventFlagsSet(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
   }
+  if (huart->Instance == USART2)
+  {
+    /* start the DMA again */
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *) EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
+    __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+
+    osEventFlagsSet(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
+  }
 }
 /* USER CODE END PFP */
 
@@ -273,6 +284,8 @@ int main(void)
   LcdInit_MSP23S17(LCD_DISP_ON_CURSOR_BLINK, &hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin);
   LcdPuts("Hello_MCP23S17", 0, 0);
 #endif
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, VComDmaBuffer, VCOM_UART_DMA_BUFFER_SIZE);
+  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
 #if (USE_ESP8266 == 1)
   ESP8266_Init(&huart1, EspRxBuffer);
   HAL_Delay(10u);
