@@ -220,8 +220,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   if (huart->Instance == USART2)
   {
     /* start the DMA again */
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t *) EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
-    __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, (uint8_t *) VComDmaBuffer, VCOM_UART_DMA_BUFFER_SIZE);
+    __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
 
     osEventFlagsSet(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
   }
