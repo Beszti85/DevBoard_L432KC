@@ -23,6 +23,4 @@ void PCUART_ProcessRxCmd( uint8_t* cmdbuffer );
 }
 #endif
 
-#endif
-
 #endif /* INC_PC_UART_HANDLER_H_ */

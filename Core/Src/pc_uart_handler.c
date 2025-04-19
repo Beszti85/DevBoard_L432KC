@@ -19,7 +19,7 @@ void PCUART_ProcessRxCmd( uint8_t* ptrBuffer )
 {
   if( !strncmp( ptrBuffer, "LED_TOGGLE", sizeof("LED_TOGGLE") - 1 ) )
   {
-    PCA9685_ToggleOutputEnable(&LedDriverHandle);
+    //PCA9685_ToggleOutputEnable(&LedDriverHandle);
   }
   else
   if( !strncmp( ptrBuffer, "ESP_AT", sizeof("ESP_AT") - 1 ) )
