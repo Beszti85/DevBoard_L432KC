@@ -15,30 +15,61 @@ uint8_t PCUART_RxBuffer[80u];
 uint8_t PCUART_EspAtCmdNum = 0u;
 static uint8_t ResponseLength = 0uj;
 
+static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size )
+{
+  while( size != 0u )
+  {
+    crc8 += *ptrBuffer;
+    ptrBuffer++;
+    size--;
+  }
+
+  return crc8;
+}
+
+static void PC_ExecCmdHandler( uint8_t* ptrBuffer )
+{
+
+}
+
+static void PC_ReadDataHandler( uint8_t* ptrBuffer )
+{
+
+}
+
+static void PcUartProtHandler( uint8_t* ptrBuffer )
+{
+  uint8_t cmd = ptrBuffer[0];
+  // Check first byte:
+  switch (cmd)
+  {
+    case 1:
+      PC_ExecCmdHandler(&ptrBuffer[1]);
+      break;
+    case 2:
+      PC_ReadDataHandler(&ptrBuffer[1]);
+    default:
+      break;
+  }
+}
+
 void PCUART_ProcessRxCmd( uint8_t* ptrBuffer )
 {
-  if( !strncmp( ptrBuffer, "LED_TOGGLE", sizeof("LED_TOGGLE") - 1 ) )
+  uint8_t cmdLength = 0u;
+  uint8_t calcCrc8  = 0u;
+  // First byte: 0xBE
+  if(   (ptrBuffer[0] == 0xBEu)
+     && (ptrBuffer[1] == ptrBuffer[2])
+	 && (ptrBuffer[3] == ptrBuffer[0])
+     && (ptrBuffer[4 + ptrBuffer[1]] == 0x27u) )
   {
-    //PCA9685_ToggleOutputEnable(&LedDriverHandle);
-  }
-  else
-  if( !strncmp( ptrBuffer, "ESP_AT", sizeof("ESP_AT") - 1 ) )
-  {
-    // go to the end of the cmd prefix
-    ptrBuffer += sizeof("ESP_AT")-1;
-    // Check the end of the string
-    if( *ptrBuffer != ' ' )
+    // save length info
+    cmdLength = ptrBuffer[1];
+    // check CRC
+    calcCrc8 = PcUartCrc8( 0u, &ptrBuffer[4], cmdLength );
+    if( calcCrc8 == ptrBuffer[4 + cmdLength] )
     {
-      // Get the number
-      PCUART_EspAtCmdNum = *ptrBuffer - '0';
-      ptrBuffer++;
-      // Any further characters - number > 9
-      if( *ptrBuffer != ' ' )
-      {
-        PCUART_EspAtCmdNum *= 10u;
-        PCUART_EspAtCmdNum += (*ptrBuffer - '0');
-      }
-      ESP8266_ProcessAtCmd( &huart1, (ESP8266_CMD_ID)PCUART_EspAtCmdNum );
+      // CRC OK: process data frame
     }
   }
 }

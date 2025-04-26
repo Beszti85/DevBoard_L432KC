@@ -71,6 +71,7 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* Definitions for Task100ms */
 osThreadId_t Task100msHandle;
@@ -220,8 +221,17 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
       osEventFlagsSet(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
   }
+  if (huart->Instance == USART2)
+  {
+    /* start the DMA again */
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, (uint8_t *) UART_PcRxBuffer, 256u);
+    __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+
+    osEventFlagsSet(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
+  }
 }
 
+#if 0
 // UART2 byte callback - PC connection
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -229,6 +239,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   UART_PcRxPktLength++;
   HAL_UART_Receive_IT(&huart2, Uart2RxByte, 1);
 }
+#endif
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -287,7 +298,11 @@ int main(void)
   LcdInit_MSP23S17(LCD_DISP_ON_CURSOR_BLINK, &hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin);
   LcdPuts("Hello_MCP23S17", 0, 0);
 #endif
+#if 0
   HAL_UART_Receive_IT(&huart2, Uart2RxByte, 1);
+#endif
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART_PcRxBuffer, 256u);
+  __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
 #if (USE_ESP8266 == 1)
   ESP8266_Init(&huart1, EspRxBuffer);
   HAL_Delay(10u);
@@ -674,6 +689,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 
 }
 
