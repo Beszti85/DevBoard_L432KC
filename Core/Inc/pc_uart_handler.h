@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-void PCUART_ProcessRxCmd( uint8_t* cmdbuffer );
+void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
 
 #ifdef __cplusplus
 }

@@ -10,10 +10,8 @@
 
 extern UART_HandleTypeDef huart1;
 
-uint8_t PCUART_RxBuffer[80u];
-
 uint8_t PCUART_EspAtCmdNum = 0u;
-static uint8_t ResponseLength = 0uj;
+static uint8_t ResponseLength = 0u;
 
 static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size )
 {
@@ -27,49 +25,58 @@ static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size 
   return crc8;
 }
 
-static void PC_ExecCmdHandler( uint8_t* ptrBuffer )
+static void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
 
 }
 
-static void PC_ReadDataHandler( uint8_t* ptrBuffer )
+static void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
-
-}
-
-static void PcUartProtHandler( uint8_t* ptrBuffer )
-{
-  uint8_t cmd = ptrBuffer[0];
-  // Check first byte:
-  switch (cmd)
+  switch (ptrRxBuffer[0])
   {
     case 1:
-      PC_ExecCmdHandler(&ptrBuffer[1]);
       break;
     case 2:
-      PC_ReadDataHandler(&ptrBuffer[1]);
+      break;
     default:
       break;
   }
 }
 
-void PCUART_ProcessRxCmd( uint8_t* ptrBuffer )
+static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
+{
+  uint8_t cmd = ptrRxBuffer[0];
+  // Check first byte:
+  switch (cmd)
+  {
+    case 1:
+      PC_ExecCmdHandler(&ptrRxBuffer[1], ptrTxBuffer);
+      break;
+    case 2:
+      PC_ReadDataHandler(&ptrRxBuffer[1], ptrTxBuffer);
+    default:
+      break;
+  }
+}
+
+void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   uint8_t cmdLength = 0u;
   uint8_t calcCrc8  = 0u;
   // First byte: 0xBE
-  if(   (ptrBuffer[0] == 0xBEu)
-     && (ptrBuffer[1] == ptrBuffer[2])
-	 && (ptrBuffer[3] == ptrBuffer[0])
-     && (ptrBuffer[4 + ptrBuffer[1]] == 0x27u) )
+  if(   (ptrRxBuffer[0] == 0xBEu)
+     && (ptrRxBuffer[1] == ptrRxBuffer[2])
+	   && (ptrRxBuffer[3] == ptrRxBuffer[0])
+     && (ptrRxBuffer[4 + ptrRxBuffer[1]] == 0x27u) )
   {
     // save length info
-    cmdLength = ptrBuffer[1];
+    cmdLength = ptrRxBuffer[1];
     // check CRC
-    calcCrc8 = PcUartCrc8( 0u, &ptrBuffer[4], cmdLength );
-    if( calcCrc8 == ptrBuffer[4 + cmdLength] )
+    calcCrc8 = PcUartCrc8( 0u, &ptrRxBuffer[4], cmdLength );
+    if( calcCrc8 == ptrRxBuffer[4 + cmdLength] )
     {
       // CRC OK: process data frame
+      PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer);
     }
   }
 }

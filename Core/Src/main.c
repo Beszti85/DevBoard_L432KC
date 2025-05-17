@@ -37,6 +37,7 @@
 #include "esp8266_at.h"
 #include <string.h>
 #include "max7219.h"
+#include "pc_uart_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -156,6 +157,7 @@ bool  ESP_MessageReceived = false;
 uint8_t Uart2RxByte;
 uint8_t UART_PcRxBuffer[256u];
 uint8_t UART_PcRxPktLength = 0u;
+uint8_t UART_PcTxBuffer[256u];
 
 /* USER CODE END PV */
 
@@ -816,6 +818,8 @@ void StartTaskComm(void *argument)
     {
       // Process the incoming frame from PC
       osEventFlagsClear(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
+      PCUART_ProcessRxCmd(UART_PcRxBuffer, UART_PcTxBuffer);
+      HAL_UART_Transmit(&huart2, UART_PcTxBuffer, 20, 500);
     }
     osDelay(1);
   }
