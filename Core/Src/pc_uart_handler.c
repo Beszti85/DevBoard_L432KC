@@ -7,8 +7,10 @@
 
 #include "pc_uart_handler.h"
 #include "esp8266_at.h"
+#include "bme280.h"
 
 extern UART_HandleTypeDef huart1;
+extern BME280_PhysValues_t BME280_PhysicalValues;
 
 uint8_t PCUART_EspAtCmdNum = 0u;
 static uint8_t ResponseLength = 0u;
@@ -34,9 +36,17 @@ static void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   switch (ptrRxBuffer[0])
   {
+    // Read Temperature BME280
     case 1:
+      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
       break;
+    // Read Humidity BME280
     case 2:
+      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Humidity, sizeof(BME280_PhysicalValues.Humidity));
+      break;
+    // Read Humidity BME280
+    case 3:
+      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Pressure, sizeof(BME280_PhysicalValues.Pressure));
       break;
     default:
       break;
