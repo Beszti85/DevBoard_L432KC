@@ -305,6 +305,8 @@ int main(void)
 #endif
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART_PcRxBuffer, 256u);
   __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+
+  HAL_UART_Transmit(&huart2, "Hello, STM32 L432KC", 19u, 100u);
 #if (USE_ESP8266 == 1)
   ESP8266_Init(&huart1, EspRxBuffer);
   HAL_Delay(10u);

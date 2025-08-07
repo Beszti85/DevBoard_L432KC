@@ -14,6 +14,7 @@ extern BME280_PhysValues_t BME280_PhysicalValues;
 
 uint8_t PCUART_EspAtCmdNum = 0u;
 static uint8_t ResponseLength = 0u;
+static uint8_t PcUartConn = 0u;
 
 static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size )
 {
@@ -36,6 +37,10 @@ static void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   switch (ptrRxBuffer[0])
   {
+    // Connect
+    case 0:
+      PcUartConn = 1;
+      break;
     // Read Temperature BME280
     case 1:
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
@@ -77,7 +82,7 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
   if(   (ptrRxBuffer[0] == 0xBEu)
      && (ptrRxBuffer[1] == ptrRxBuffer[2])
 	   && (ptrRxBuffer[3] == ptrRxBuffer[0])
-     && (ptrRxBuffer[4 + ptrRxBuffer[1]] == 0x27u) )
+     && (ptrRxBuffer[4 + ptrRxBuffer[1] + 1u] == 0x27u) )
   {
     // save length info
     cmdLength = ptrRxBuffer[1];
