@@ -37,10 +37,7 @@ static void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   switch (ptrRxBuffer[0])
   {
-    // Connect
-    case 0:
-      PcUartConn = 1;
-      break;
+
     // Read Temperature BME280
     case 1:
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
@@ -64,9 +61,17 @@ static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
   // Check first byte:
   switch (cmd)
   {
+    // Connect
+    case 0:
+      PcUartConn = 1;
+      *ptrTxBuffer = 0x12u;
+      ptrTxBuffer++;
+      break;
+    // Execute Cmd
     case 1:
       PC_ExecCmdHandler(&ptrRxBuffer[1], ptrTxBuffer);
       break;
+    // Read Data
     case 2:
       PC_ReadDataHandler(&ptrRxBuffer[1], ptrTxBuffer);
     default:
