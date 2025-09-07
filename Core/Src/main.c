@@ -238,15 +238,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
   }
 }
 
-#if 0
-// UART2 byte callback - PC connection
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  UART_PcRxBuffer[UART_PcRxPktLength] = Uart2RxByte;
-  UART_PcRxPktLength++;
-  HAL_UART_Receive_IT(&huart2, Uart2RxByte, 1);
-}
-#endif
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -307,9 +298,7 @@ int main(void)
   LcdInit_MSP23S17(LCD_DISP_ON_CURSOR_BLINK, &hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin);
   LcdPuts("Hello_MCP23S17", 0, 0);
 #endif
-#if 0
-  HAL_UART_Receive_IT(&huart2, Uart2RxByte, 1);
-#endif
+  // UART DMA Init
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, UART_PcRxBuffer, 256u);
   __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
 
