@@ -47,7 +47,7 @@ static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       break;
     // Read Data
     case 2:
-      PC_ReadDataHandler(&ptrRxBuffer[1], ptrTxBuffer);
+      PC_ReadDataHandler(ptrRxBuffer[1], ptrTxBuffer);
     default:
       break;
   }

@@ -12,7 +12,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
+#define BOARD_ID                 0u
+#define BME280_PHYSICAL_VALUES   1u
+#define ADC_PHY_VALUES           2u
 
+void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
 
 #endif /* INC_PC_DATA_READWRITE_H_ */

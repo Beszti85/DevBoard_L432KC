@@ -10,18 +10,26 @@
 
 extern BME280_PhysValues_t BME280_PhysicalValues;
 
-void PC_ReadDataHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
+void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
 {
-  switch (ptrRxBuffer[0])
+  switch (readId)
   {
-
-    // Read Temperature BME280
-    case 1:
-      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
+    // Read board name
+    case BOARD_ID:
+      memcpy(ptrTxBuffer, "NucleoL432KC_DevBoard", sizeof("NucleoL432KC_DevBoard"));
       break;
-    // Read Humidity BME280
-    case 2:
+    // Read BME280 physical values
+    case BME280_PHYSICAL_VALUES:
+      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
+      ptrTxBuffer += sizeof(BME280_PhysicalValues.Temperature);
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Humidity, sizeof(BME280_PhysicalValues.Humidity));
+      ptrTxBuffer += sizeof(BME280_PhysicalValues.Humidity);
+      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Pressure, sizeof(BME280_PhysicalValues.Pressure));
+      ptrTxBuffer += sizeof(BME280_PhysicalValues.Pressure);
+      break;
+    // Read ADC data
+    case ADC_PHY_VALUES:
+
       break;
     // Read Humidity BME280
     case 3:
