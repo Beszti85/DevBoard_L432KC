@@ -29,7 +29,7 @@ void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       break;
     // Read ADC data
     case ADC_PHY_VALUES:
-
+      memcpy(ptrTxBuffer, ADC_Voltage, sizeof(ADC_Voltage));
       break;
     // Read Humidity BME280
     case 3:
