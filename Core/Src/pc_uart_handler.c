@@ -31,22 +31,22 @@ static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size 
 
 static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
-  uint8_t cmd = ptrRxBuffer[0];
+  PCUART_ServiceCommand_e cmd = (PCUART_ServiceCommand_e)ptrRxBuffer[0];
   // Check first byte:
   switch (cmd)
   {
     // Connect
-    case 0:
+    case PCUART_CONNECT:
       PcUartConn = 1;
       *ptrTxBuffer = 0x12u;
       ptrTxBuffer++;
       break;
     // Execute Cmd
-    case 1:
+    case PCUART_READ_DATA:
       PC_ExecCmdHandler(&ptrRxBuffer[1], ptrTxBuffer);
       break;
     // Read Data
-    case 2:
+    case PCUART_CMD_EXEC:
       PC_ReadDataHandler(ptrRxBuffer[1], ptrTxBuffer);
     default:
       break;

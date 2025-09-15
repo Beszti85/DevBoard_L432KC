@@ -15,6 +15,7 @@
 #define BOARD_ID                 0u
 #define BME280_PHYSICAL_VALUES   1u
 #define ADC_PHY_VALUES           2u
+#define FLASH_ID                 3u
 
 void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
 

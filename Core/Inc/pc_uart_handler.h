@@ -17,6 +17,16 @@
 extern "C" {
 #endif
 
+typedef enum
+{
+  PCUART_CONNECT = 0u,
+  PCUART_READ_DATA,
+  PCUART_WRITE_DATA,
+  PCUART_CMD_EXEC,
+  PCUART_NUM_OF_CMD
+} PCUART_ServiceCommand_e;
+
+
 void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
 
 #ifdef __cplusplus

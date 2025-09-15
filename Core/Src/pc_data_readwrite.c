@@ -7,8 +7,11 @@
 
 #include "pc_data_readwrite.h"
 #include "bme280.h"
+#include "flash.h"
 
 extern BME280_PhysValues_t BME280_PhysicalValues;
+extern FLASH_Handler_t FlashHandler;
+extern float ADC_Voltage[5u];
 
 void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
 {
@@ -32,8 +35,8 @@ void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       memcpy(ptrTxBuffer, ADC_Voltage, sizeof(ADC_Voltage));
       break;
     // Read Humidity BME280
-    case 3:
-      memcpy(ptrTxBuffer, &BME280_PhysicalValues.Pressure, sizeof(BME280_PhysicalValues.Pressure));
+    case FLASH_ID:
+      memcpy(ptrTxBuffer, &FlashHandler.DetectedFlash, sizeof(FlashHandler.DetectedFlash));
       break;
     default:
       break;
