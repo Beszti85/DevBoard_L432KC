@@ -69,8 +69,13 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
     calcCrc8 = PcUartCrc8( 0u, &ptrRxBuffer[4], cmdLength );
     if( calcCrc8 == ptrRxBuffer[4 + cmdLength] )
     {
+      // Fill RxBuffer
+      ptrTxBuffer[0] = 0xBEu;
+      ptrTxBuffer[3] = 0xBEu;
+      ptrTxBuffer[4] = ptrRxBuffer[4] | 0x80u;
       // CRC OK: process data frame
-      PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer);
+      PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer[5u]);
+
     }
   }
 }

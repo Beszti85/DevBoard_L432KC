@@ -17,6 +17,6 @@
 #define ADC_PHY_VALUES           2u
 #define FLASH_ID                 3u
 
-void PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
+uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
 
 #endif /* INC_PC_DATA_READWRITE_H_ */
