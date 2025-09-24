@@ -29,8 +29,9 @@ static uint8_t PcUartCrc8( uint8_t crc8, uint8_t const* ptrBuffer, uint8_t size 
   return crc8;
 }
 
-static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
+static uint16_t PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
+  uint16_t resp_length = 0u;
   PCUART_ServiceCommand_e cmd = (PCUART_ServiceCommand_e)ptrRxBuffer[0];
   // Check first byte:
   switch (cmd)
@@ -40,20 +41,25 @@ static void PcUartProtHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       PcUartConn = 1;
       *ptrTxBuffer = 0x12u;
       ptrTxBuffer++;
+      resp_length = 1;
       break;
     // Execute Cmd
     case PCUART_READ_DATA:
       PC_ExecCmdHandler(&ptrRxBuffer[1], ptrTxBuffer);
+      resp_length = 1;
       break;
     // Read Data
     case PCUART_CMD_EXEC:
-      PC_ReadDataHandler(ptrRxBuffer[1], ptrTxBuffer);
+      resp_length = PC_ReadDataHandler(ptrRxBuffer[1], ptrTxBuffer);
+      resp_length++;
     default:
       break;
+
+    return resp_length;
   }
 }
 
-void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
+uint8_t PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   uint8_t cmdLength = 0u;
   uint8_t calcCrc8  = 0u;
@@ -62,7 +68,7 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
   if(   (ptrRxBuffer[0] == 0xBEu)
      && (ptrRxBuffer[1] == ptrRxBuffer[2])
 	   && (ptrRxBuffer[3] == ptrRxBuffer[0])
-     && (ptrRxBuffer[4 + ptrRxBuffer[1] + 1u] == 0x27u) )
+     && (ptrRxBuffer[4 + ptrRxBuffer[1] + 1] == 0x27u) )
   {
     // save length info
     cmdLength = ptrRxBuffer[1];
@@ -78,7 +84,9 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       response_length = PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer[5u]);
       ptrTxBuffer[1] = response_length;
       ptrTxBuffer[2] = response_length;
-      ptrTxBuffer[4 + response_length + 1u] = PcUartCrc8( 0u, &ptrTxBuffer[4u], response_length)
+      ptrTxBuffer[4 + response_length + 1u] = PcUartCrc8( 0u, &ptrTxBuffer[4u], response_length);
+      response_length += 6u;
     }
   }
+  return response_length;
 }

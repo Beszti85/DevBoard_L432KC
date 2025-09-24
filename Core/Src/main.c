@@ -889,6 +889,7 @@ void StartTaskComm(void *argument)
 {
   /* USER CODE BEGIN StartTaskComm */
   uint32_t eventFlags = 0u;
+  uint16_t pcUartTxSize = 0u;
   /* Infinite loop */
   for(;;)
   {
@@ -903,8 +904,8 @@ void StartTaskComm(void *argument)
     {
       // Process the incoming frame from PC
       osEventFlagsClear(EventComTaskHandle, VCP_EVENT_FLAG_MASK);
-      PCUART_ProcessRxCmd(UART_PcRxBuffer, UART_PcTxBuffer);
-      HAL_UART_Transmit(&huart2, UART_PcTxBuffer, 20, 500);
+      pcUartTxSize = PCUART_ProcessRxCmd(UART_PcRxBuffer, UART_PcTxBuffer);
+      HAL_UART_Transmit(&huart2, UART_PcTxBuffer, pcUartTxSize, 500);
     }
     osDelay(1);
   }

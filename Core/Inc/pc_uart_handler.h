@@ -27,7 +27,7 @@ typedef enum
 } PCUART_ServiceCommand_e;
 
 
-void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
+uint8_t PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
 
 #ifdef __cplusplus
 }
