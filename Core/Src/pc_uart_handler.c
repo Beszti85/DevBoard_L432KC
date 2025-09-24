@@ -57,6 +57,7 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
   uint8_t cmdLength = 0u;
   uint8_t calcCrc8  = 0u;
+  uint8_t response_length = 0u;
   // First byte: 0xBE
   if(   (ptrRxBuffer[0] == 0xBEu)
      && (ptrRxBuffer[1] == ptrRxBuffer[2])
@@ -74,8 +75,10 @@ void PCUART_ProcessRxCmd( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       ptrTxBuffer[3] = 0xBEu;
       ptrTxBuffer[4] = ptrRxBuffer[4] | 0x80u;
       // CRC OK: process data frame
-      PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer[5u]);
-
+      response_length = PcUartProtHandler(&ptrRxBuffer[4], ptrTxBuffer[5u]);
+      ptrTxBuffer[1] = response_length;
+      ptrTxBuffer[2] = response_length;
+      ptrTxBuffer[4 + response_length + 1u] = PcUartCrc8( 0u, &ptrTxBuffer[4u], response_length)
     }
   }
 }
