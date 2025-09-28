@@ -38,6 +38,7 @@
 #include <string.h>
 #include "max7219.h"
 #include "pc_uart_handler.h"
+#include "mcp4725.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
