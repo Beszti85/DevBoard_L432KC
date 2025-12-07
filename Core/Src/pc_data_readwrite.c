@@ -12,6 +12,7 @@
 extern BME280_PhysValues_t BME280_PhysicalValues;
 extern FLASH_Handler_t FlashHandler;
 extern float ADC_Voltage[5u];
+extern uint32_t TIM1_PwmDutyCycle;
 
 uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
 {
@@ -44,6 +45,10 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
     case FLASH_ID:
       memcpy(ptrTxBuffer, &FlashHandler.DetectedFlash, sizeof(FlashHandler.DetectedFlash));
       retval = 1u;
+      break;
+    case LED_PWM:
+      memcpy(ptrTxBuffer, &TIM1_PwmDutyCycle, sizeof(TIM1_PwmDutyCycle));
+      retval = 4u;
       break;
     default:
       break;
