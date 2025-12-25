@@ -17,6 +17,9 @@
 #define ADC_PHY_VALUES           2u
 #define FLASH_ID                 3u
 #define LED_PWM                  4u
+#define FLASH_READ               5u
+
+#define FLASH_CFG_WRITE          1u
 
 uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
 

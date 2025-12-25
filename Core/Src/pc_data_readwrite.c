@@ -9,11 +9,17 @@
 #include "bme280.h"
 #include "flash.h"
 
+// TODO: restructure the extern variables
 extern BME280_PhysValues_t BME280_PhysicalValues;
 extern FLASH_Handler_t FlashHandler;
 extern float ADC_Voltage[5u];
 extern uint32_t TIM1_PwmDutyCycle;
 
+// Static module variables
+uint32_t PcExtFlashReadAddress = 0u;
+uint32_t PcExtFlashReadLength = 0u;
+
+// Data read handler
 uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
 {
   // return value is the length of the response
@@ -41,10 +47,15 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       memcpy(ptrTxBuffer, ADC_Voltage, sizeof(ADC_Voltage));
       retval = 20u;
       break;
-    // Read Humidity BME280
+    // Read Flash ID
     case FLASH_ID:
       memcpy(ptrTxBuffer, &FlashHandler.DetectedFlash, sizeof(FlashHandler.DetectedFlash));
       retval = 1u;
+      break;
+    // Read Flash data
+    case FLASH_READ:
+      FLASH_Read(&FlashHandler, PcExtFlashReadAddress, ptrTxBuffer, PcExtFlashReadLength);
+      retval = PcExtFlashReadLength;
       break;
     case LED_PWM:
       memcpy(ptrTxBuffer, &TIM1_PwmDutyCycle, sizeof(TIM1_PwmDutyCycle));
@@ -55,4 +66,19 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
   }
 
   return retval;
+}
+
+// Data write handler
+void PC_WriteDataHandler( uint8_t writeId, uint8_t* ptrTxBuffer)
+{
+  switch (writeId)
+  {
+    // Set flash read address
+    case FLASH_CFG_WRITE:
+      memcpy(&PcExtFlashReadAddress, ptrTxBuffer, sizeof(PcExtFlashReadAddress));
+      memcpy(&PcExtFlashReadLength, ptrTxBuffer + sizeof(PcExtFlashReadAddress), sizeof(PcExtFlashReadLength));
+      break;
+    default:
+      break;
+  }
 }
