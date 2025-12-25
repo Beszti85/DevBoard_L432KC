@@ -2,10 +2,34 @@
     "configurations": [
         {
             "name": "STM32",
-            "compileCommands": "${workspaceFolder}/build/debug/build/compile_commands.json",
+            "compileCommands": "${workspaceFolder}/build/Debug/compile_commands.json",
             "intelliSenseMode": "windows-msvc-x64",
             "cStandard": "c17",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/Core/Inc",
+                "${workspaceFolder}/Drivers/CMSIS/Include",
+                "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                "${workspaceFolder}/Drivers/STM32L4xx_HAL_Driver/Inc",
+                "${workspaceFolder}/ChipDrivers/Inc",
+                "${workspaceFolder}/FwLibraries/Inc"
+            ],
+            "defines": [
+                "STM32L432xx",
+                "USE_HAL_DRIVER"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/Core/Inc",
+                    "${workspaceFolder}/Drivers/CMSIS/Include",
+                    "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                    "${workspaceFolder}/Drivers/STM32L4xx_HAL_Driver/Inc",
+                    "${workspaceFolder}/ChipDrivers/Inc",
+                    "${workspaceFolder}/FwLibraries/Inc"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4

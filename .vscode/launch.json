@@ -1,43 +1,18 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "stlinkgdbtarget",
-      "request": "launch",
-      "name": "STM32Cube: STM32 Launch ST-Link GDB Server",
-      "origin": "snippet",
-      "cwd": "${workspaceFolder}",
-      "preBuild": "${command:st-stm32-ide-debug-launch.build}",
-      "runEntry": "main",
-      "imagesAndSymbols": [
+    "configurations": [
         {
-          "imageFileName": "${command:st-stm32-ide-debug-launch.get-projects-binary-from-context1}"
+            "name": "debug_stlink",
+            "type": "stlinkgdbtarget",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "preBuild": "${command:st-stm32-ide-debug-launch.build}",
+            "runEntry": "main",
+            "imagesAndSymbols": [
+                {
+                    "imageFileName": "${workspaceFolder}/build/Debug/DevBoard_L432KC.elf"
+                }
+            ],
+            "verbose": false
         }
-      ]
-    },
-    {
-      "name": "Launch",
-      "type": "cppdbg",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "program": "${command:cmake.launchTargetPath}",
-      "MIMode": "gdb",
-      "miDebuggerPath": "${command:vscode-embedded.st.gdb}",
-      "miDebuggerServerAddress": "localhost:3333",
-      "debugServerPath": "${command:vscode-embedded.st.gdbserver}",
-      "debugServerArgs": "--stm32cubeprogrammer-path ${command:vscode-embedded.st.cubeprogrammer} --swd --port-number 3333",
-      "serverStarted": "Waiting for connection on port .*\\.\\.\\.",
-      "stopAtConnect": true,
-      "postRemoteConnectCommands": [
-        {
-          "text": "load build/debug/build/DevBoard_L432KC.elf"
-        }
-      ],
-      "logging": {
-        "engineLogging": true
-      },
-      "preLaunchTask": "Build",
-      "svdPath": "${command:vscode-embedded.st.svd}/STM32L432.svd"
-    }
-  ]
+    ]
 }
