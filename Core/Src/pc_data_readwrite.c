@@ -69,8 +69,9 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
 }
 
 // Data write handler
-void PC_WriteDataHandler( uint8_t writeId, uint8_t* ptrTxBuffer)
+void PC_WriteDataHandler( uint8_t* ptrTxBuffer )
 {
+  uint8_t writeId = ptrTxBuffer[0];
   switch (writeId)
   {
     // Set flash read address

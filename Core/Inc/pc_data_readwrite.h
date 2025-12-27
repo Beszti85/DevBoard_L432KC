@@ -22,5 +22,6 @@
 #define FLASH_CFG_WRITE          1u
 
 uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer );
+void PC_WriteDataHandler( uint8_t* ptrTxBuffer );
 
 #endif /* INC_PC_DATA_READWRITE_H_ */
