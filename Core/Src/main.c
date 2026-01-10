@@ -202,7 +202,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
       if (oldPos+Size > ESP_RX_BUFFER_SIZE)  // If the current position + new data size is greater than the main buffer
       {
         uint16_t datatocopy = ESP_RX_BUFFER_SIZE-oldPos;  // find out how much space is left in the main buffer
-        memcpy ((uint8_t *)EspRxBuffer+oldPos, EspDmaBuffer, datatocopy);  // copy data in that remaining space
+        memcpy ((uint8_t *)EspRxBuffer+oldPos, (uint8_t *)EspDmaBuffer, datatocopy);  // copy data in that remaining space
 
         oldPos = 0;  // point to the start of the buffer
         memcpy ((uint8_t *)EspRxBuffer, (uint8_t *)EspDmaBuffer+datatocopy, (Size-datatocopy));  // copy the remaining data
@@ -214,7 +214,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
        */
       else
       {
-        memcpy ((uint8_t *)EspRxBuffer+oldPos, EspDmaBuffer, Size);
+        memcpy ((uint8_t *)EspRxBuffer+oldPos, (uint8_t*)EspDmaBuffer, Size);
         newPos = Size+oldPos;
       }
     }
@@ -305,9 +305,9 @@ int main(void)
 
   //HAL_UART_Transmit(&huart2, "Hello, STM32 L432KC", 19u, 100u);
 #if (USE_ESP8266 == 1)
-  ESP8266_Init(&huart1, EspRxBuffer);
+  ESP8266_Init(&huart1, (uint8_t*)EspRxBuffer);
   HAL_Delay(10u);
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, (uint8_t*)EspDmaBuffer, ESP_UART_DMA_BUFFER_SIZE);
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx, DMA_IT_HT);
 #endif
   /* USER CODE END 2 */
@@ -898,7 +898,7 @@ void StartTaskComm(void *argument)
     if( eventFlags |= ESP_EVENT_FLAG_MASK )
     {
       // Process the incoming data that is not OK
-      ESP8266_AtReportHandler(EspRxBuffer);
+      ESP8266_AtReportHandler((uint8_t*)EspRxBuffer);
       osEventFlagsClear(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
     if( eventFlags |= VCP_EVENT_FLAG_MASK)

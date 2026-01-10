@@ -53,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/ChipDrivers/Src/flash.c
     ${CMAKE_SOURCE_DIR}/ChipDrivers/Src/esp8266_at.c
     ${CMAKE_SOURCE_DIR}/ChipDrivers/Src/mcp4725.c
+    ${CMAKE_SOURCE_DIR}/ChipDrivers/Src/ds1307.c
     ${CMAKE_SOURCE_DIR}/FwLibraries/Src/pc_uart_handler.c
 )
 
