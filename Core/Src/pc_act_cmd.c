@@ -36,5 +36,8 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
                ( (uint16_t)ptrRxBuffer[5] );
       FLASH_Write(&FlashHandler, tmpU32, &ptrRxBuffer[6], tmpU16);
       break;
+    // Erase external flash
+    case PC_CM_FLASH_ERASE:
+      FLASH_Erase(&FlashHandler);
   }
 }
