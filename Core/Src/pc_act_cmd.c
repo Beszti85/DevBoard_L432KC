@@ -25,7 +25,7 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       tmpU32 = ( (uint32_t)ptrRxBuffer[1] << 16u ) |
                ( (uint32_t)ptrRxBuffer[2] << 8u )  |
                ( (uint32_t)ptrRxBuffer[3] );
-      tmpU16 = ( (uint16_t)ptrRxBuffer[4] << 8u ) |
+      tmpU16 = ( (uint16_t)ptrRxBuffer[4] << 8u )  |
                ( (uint16_t)ptrRxBuffer[5] );
       FLASH_Read(&FlashHandler, tmpU32, ptrTxBuffer, tmpU16);
       break;
