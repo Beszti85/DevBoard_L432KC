@@ -79,6 +79,9 @@ void PC_WriteDataHandler( uint8_t* ptrTxBuffer )
       memcpy(&PcExtFlashReadAddress, ptrTxBuffer, sizeof(PcExtFlashReadAddress));
       memcpy(&PcExtFlashReadLength, ptrTxBuffer + sizeof(PcExtFlashReadAddress), sizeof(PcExtFlashReadLength));
       break;
+    case LED_PWM:
+      memcpy(&TIM1_PwmDutyCycle, ptrTxBuffer, sizeof(TIM1_PwmDutyCycle)); 
+      break;
     default:
       break;
   }

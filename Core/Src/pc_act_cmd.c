@@ -41,10 +41,14 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
     // Erase external flash
     case PC_CMD_FLASH_ERASE:
       FLASH_Erase(&FlashHandler);
+      break;
     // Start DS1307
     case PC_CMD_DS1307_START:
       DS1307_TimeDate_t dateTime;
       memcpy(&dateTime, ptrRxBuffer, sizeof(dateTime));
       DS1307_Init(&DS1307_Handle, &dateTime);
+      break;
+    case LED_CTRL:
+      break;
   }
 }

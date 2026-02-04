@@ -16,6 +16,7 @@
 #define PC_CMD_FLASH_WRITE   0x02u
 #define PC_CMD_FLASH_ERASE   0x03u
 #define PC_CMD_DS1307_START  0x04u
+#define LED_CTRL             0x05u
 
 void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
 
