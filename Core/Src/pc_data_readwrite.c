@@ -8,6 +8,7 @@
 #include "pc_data_readwrite.h"
 #include "bme280.h"
 #include "flash.h"
+#include "mcp4725.h"
 
 // TODO: restructure the extern variables
 extern BME280_PhysValues_t BME280_PhysicalValues;
@@ -61,6 +62,8 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       memcpy(ptrTxBuffer, &TIM1_PwmDutyCycle, sizeof(TIM1_PwmDutyCycle));
       retval = 4u;
       break;
+    case DAC_OUTPUT:
+      break;
     default:
       break;
   }
@@ -81,6 +84,8 @@ void PC_WriteDataHandler( uint8_t* ptrTxBuffer )
       break;
     case LED_PWM:
       memcpy(&TIM1_PwmDutyCycle, ptrTxBuffer, sizeof(TIM1_PwmDutyCycle)); 
+      break;
+    case DAC_OUTPUT:
       break;
     default:
       break;
