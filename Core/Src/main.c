@@ -169,6 +169,8 @@ DS1307_Handler_t  DS1307_Handle = { .ptrHI2c = &hi2c1, .Address = 0xD0u };
 DS1307_TimeDate_t DS1307_InitDateTime = { .Seconds = 0u, .Minutes = 0x37u, .Hours = 0x09u, .Day = 6u, .Date = 4u, .Month = 3u, .Year = 0x23u };
 DS1307_TimeDate_t DS1307_DateTime;
 
+MCP4725_Handle_s MCP4725_Handle = { .ptrHI2c = &hi2c1, .Address = 0xC0u };
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -295,7 +297,7 @@ int main(void)
   BME280_StartMeasurement(Oversampling1, Oversampling1, Oversampling1);
   FLASH_Identification(&FlashHandler);
   NRF24L01_Init(&RFHandler);
-  MCP4725_Read(&hi2c1);
+  MCP4725_Read(&MCP4725_Handle);
 #if (USE_SPI_MODULE == 1)
   SPIMODULE_Init(&hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin );
 #endif
