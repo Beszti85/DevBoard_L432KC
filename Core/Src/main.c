@@ -297,7 +297,7 @@ int main(void)
   BME280_StartMeasurement(Oversampling1, Oversampling1, Oversampling1);
   FLASH_Identification(&FlashHandler);
   NRF24L01_Init(&RFHandler);
-  MCP4725_Read(&MCP4725_Handle);
+  MCP4725_Read(&MCP4725_Handle, 5u);
 #if (USE_SPI_MODULE == 1)
   SPIMODULE_Init(&hspi1, CS_MCP23S17_GPIO_Port, CS_MCP23S17_Pin );
 #endif
