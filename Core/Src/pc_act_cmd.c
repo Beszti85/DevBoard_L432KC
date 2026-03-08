@@ -48,6 +48,10 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
       memcpy(&dateTime, ptrRxBuffer, sizeof(dateTime));
       DS1307_Init(&DS1307_Handle, &dateTime);
       break;
+    // Control the DS1307 output control signal
+    case PC_CMD_DS1307_CTRL_SQW:
+      DS1307_SquareWaveOutput(&DS1307_Handle, (DS1307_Frequency_e)ptrRxBuffer[0]);
+      break;
     case LED_CTRL:
       break;
   }
