@@ -172,6 +172,15 @@ DS1307_TimeDate_t DS1307_DateTime;
 
 MCP4725_Handle_s MCP4725_Handle = { .ptrHI2c = &hi2c1, .Address = 0xC0u };
 
+LED_PWM_Handler_s LED_Red =
+{
+  .PtrTimHandle = &htim1,
+  .ActiveState  = true,
+  .PwmCtrl      = true,
+  .DutyCycle    = 50u,
+  .Color        = RED,
+};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -876,12 +885,16 @@ void StartTask1sec(void *argument)
   {
 	  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
     BME280_ReadMeasResult();
+#if 0
     TIM1->CCR1 = TIM1_PwmDutyCycle;
     TIM1_PwmDutyCycle += 200u;
     if( TIM1_PwmDutyCycle > 65535u )
     {
       TIM1_PwmDutyCycle = 0u;
     }
+#else
+    LED_SetPwmDuty(&LED_Red, 50);
+#endif
     osDelay(1000);
   }
   /* USER CODE END StartTask1sec */
