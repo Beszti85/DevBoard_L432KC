@@ -175,10 +175,19 @@ MCP4725_Handle_s MCP4725_Handle = { .ptrHI2c = &hi2c1, .Address = 0xC0u };
 LED_PWM_Handler_s LED_Red =
 {
   .PtrTimHandle = &htim1,
+  .Channel      = TIM_CHANNEL_1,
   .ActiveState  = true,
   .PwmCtrl      = true,
   .DutyCycle    = 50u,
   .Color        = RED,
+};
+
+LED_IO_Handler_s LED_Yellow =
+{
+  .ActiveState = true,
+  .Color       = YELLOW,
+  .PtrGpioPort = GPIO_OUT_Pin,
+  .GpioPin     = GPIO_OUT_GPIO_Port
 };
 
 /* USER CODE END PV */

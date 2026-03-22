@@ -8,9 +8,12 @@
 #include "pc_act_cmd.h"
 #include "flash.h"
 #include "ds1307.h"
+#include "led.h"
 
 extern FLASH_Handler_t FlashHandler;
 extern DS1307_Handler_t DS1307_Handle;
+extern LED_IO_Handler_s LED_Yellow;
+extern LED_PWM_Handler_s LED_Red;
 
 void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
@@ -52,7 +55,13 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
     case PC_CMD_DS1307_CTRL_SQW:
       DS1307_SquareWaveOutput(&DS1307_Handle, (DS1307_Frequency_e)ptrRxBuffer[0]);
       break;
-    case LED_CTRL:
+    // Control basic IO LED
+    case LED_CTRL_TOGGLE:
+      LED_Toggle( &LED_Yellow );
+      break;
+    // Control PWM-driven LED
+    case LED_PWM_CTRL:
+      LED_SetPwmDuty( &LED_Red, ptrRxBuffer[1]);
       break;
   }
 }
