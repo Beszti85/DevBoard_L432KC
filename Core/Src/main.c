@@ -184,10 +184,10 @@ LED_PWM_Handler_s LED_Red =
 
 LED_IO_Handler_s LED_Yellow =
 {
+  .PtrGpioPort = LED_YELLOW_Pin,
+  .GpioPin     = LED_YELLOW_GPIO_Port,
   .ActiveState = true,
   .Color       = YELLOW,
-  .PtrGpioPort = GPIO_OUT_Pin,
-  .GpioPin     = GPIO_OUT_GPIO_Port
 };
 
 /* USER CODE END PV */
@@ -294,7 +294,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
- 
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -831,7 +831,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(CS_NRF24L01_GPIO_Port, CS_NRF24L01_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CE_NRF24L01_Pin|LD3_Pin|CS_FLASH_Pin|GPIO_OUT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, CE_NRF24L01_Pin|LED_YELLOW_Pin|LD3_Pin|CS_FLASH_Pin
+                          |GPIO_OUT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_NRF24L01_Pin */
   GPIO_InitStruct.Pin = CS_NRF24L01_Pin;
@@ -840,8 +841,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(CS_NRF24L01_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CE_NRF24L01_Pin LD3_Pin CS_FLASH_Pin GPIO_OUT_Pin */
-  GPIO_InitStruct.Pin = CE_NRF24L01_Pin|LD3_Pin|CS_FLASH_Pin|GPIO_OUT_Pin;
+  /*Configure GPIO pins : CE_NRF24L01_Pin LED_YELLOW_Pin LD3_Pin CS_FLASH_Pin
+                           GPIO_OUT_Pin */
+  GPIO_InitStruct.Pin = CE_NRF24L01_Pin|LED_YELLOW_Pin|LD3_Pin|CS_FLASH_Pin
+                          |GPIO_OUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -893,6 +896,7 @@ void StartTask1sec(void *argument)
   for(;;)
   {
 	  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
     BME280_ReadMeasResult();
 #if 0
     TIM1->CCR1 = TIM1_PwmDutyCycle;
