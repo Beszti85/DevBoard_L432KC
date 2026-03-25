@@ -184,8 +184,8 @@ LED_PWM_Handler_s LED_Red =
 
 LED_IO_Handler_s LED_Yellow =
 {
-  .PtrGpioPort = LED_YELLOW_Pin,
-  .GpioPin     = LED_YELLOW_GPIO_Port,
+  .PtrGpioPort = LED_YELLOW_GPIO_Port,
+  .GpioPin     = LED_YELLOW_Pin,
   .ActiveState = true,
   .Color       = YELLOW,
 };
@@ -896,7 +896,6 @@ void StartTask1sec(void *argument)
   for(;;)
   {
 	  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
     BME280_ReadMeasResult();
 #if 0
     TIM1->CCR1 = TIM1_PwmDutyCycle;
