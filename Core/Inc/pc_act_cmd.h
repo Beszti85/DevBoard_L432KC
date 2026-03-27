@@ -19,6 +19,8 @@
 #define LED_CTRL_TOGGLE             0x05u
 #define LED_PWM_CTRL                0x06u
 #define PC_CMD_DS1307_CTRL_SQW      0x11u
+#define NRF24_READ_REG              0x15u
+#define NRF24_WRITE_REG             0x16u
 
 void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer );
 

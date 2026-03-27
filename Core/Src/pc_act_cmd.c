@@ -9,11 +9,13 @@
 #include "flash.h"
 #include "ds1307.h"
 #include "led.h"
+#include "nrf24l01.h"
 
 extern FLASH_Handler_t FlashHandler;
 extern DS1307_Handler_t DS1307_Handle;
 extern LED_IO_Handler_s LED_Yellow;
 extern LED_PWM_Handler_s LED_Red;
+extern NRF24L01_Handler_t RFHandler;
 
 void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
 {
@@ -39,21 +41,21 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
                ( (uint32_t)ptrRxBuffer[3] );
       tmpU16 = ( (uint16_t)ptrRxBuffer[4] << 8u ) |
                ( (uint16_t)ptrRxBuffer[5] );
-      FLASH_Write(&FlashHandler, tmpU32, &ptrRxBuffer[6], tmpU16);
+      FLASH_Write( &FlashHandler, tmpU32, &ptrRxBuffer[6], tmpU16 );
       break;
     // Erase external flash
     case PC_CMD_FLASH_ERASE:
-      FLASH_Erase(&FlashHandler);
+      FLASH_Erase( &FlashHandler );
       break;
     // Start DS1307
     case PC_CMD_DS1307_START:
       DS1307_TimeDate_t dateTime;
       memcpy(&dateTime, ptrRxBuffer, sizeof(dateTime));
-      DS1307_Init(&DS1307_Handle, &dateTime);
+      DS1307_Init( &DS1307_Handle, &dateTime );
       break;
     // Control the DS1307 output control signal
     case PC_CMD_DS1307_CTRL_SQW:
-      DS1307_SquareWaveOutput(&DS1307_Handle, (DS1307_Frequency_e)ptrRxBuffer[0]);
+      DS1307_SquareWaveOutput( &DS1307_Handle, (DS1307_Frequency_e)ptrRxBuffer[1] );
       break;
     // Control basic IO LED
     case LED_CTRL_TOGGLE:
@@ -62,6 +64,12 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
     // Control PWM-driven LED
     case LED_PWM_CTRL:
       LED_SetPwmDuty( &LED_Red, ptrRxBuffer[1]);
+      break;
+    case NRF24_READ_REG:
+      NRF24L01_ReadRegister1Byte( &RFHandler, (NRF24L01_RegParam_e)ptrRxBuffer[1] );
+      memcpy( ptrTxBuffer, &RFHandler.RxBuffer, 1u );
+      break;
+    case NRF24_WRITE_REG:
       break;
   }
 }
