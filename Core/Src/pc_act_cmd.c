@@ -65,11 +65,12 @@ void PC_ExecCmdHandler( uint8_t* ptrRxBuffer, uint8_t* ptrTxBuffer )
     case LED_PWM_CTRL:
       LED_SetPwmDuty( &LED_Red, ptrRxBuffer[1]);
       break;
-    case NRF24_READ_REG:
+    case NRF24_READ_REG_1BYTE:
       NRF24L01_ReadRegister1Byte( &RFHandler, (NRF24L01_RegParam_e)ptrRxBuffer[1] );
       memcpy( ptrTxBuffer, &RFHandler.RxBuffer, 1u );
       break;
-    case NRF24_WRITE_REG:
+    case NRF24_WRITE_REG_1BYTE:
+      NRF24L01_WriteRegister1Byte( &RFHandler, (NRF24L01_RegParam_e)ptrRxBuffer[1u], ptrRxBuffer[2u] );
       break;
   }
 }
