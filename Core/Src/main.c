@@ -905,7 +905,7 @@ void StartTask1sec(void *argument)
       TIM1_PwmDutyCycle = 0u;
     }
 #else
-    LED_SetPwmDuty(&LED_Red, 50);
+    //LED_SetPwmDuty(&LED_Red, 50);
 #endif
     osDelay(1000);
   }
