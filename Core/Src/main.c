@@ -217,6 +217,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     {
       ESP_ResponseOK = true;
     }
+    // Check if it as a busy report message
+    else if( strncmp(EspDmaBuffer, "busy p", 6) )
+    {
+      // ESP is busy, wait for more time
+    }
     else
     {
       oldPos = newPos;  // Update the last position before copying new data
@@ -931,7 +936,16 @@ void StartTaskComm(void *argument)
     if( eventFlags |= ESP_EVENT_FLAG_MASK )
     {
       // Process the incoming data that is not OK
-      ESP8266_AtReportHandler((uint8_t*)EspRxBuffer);
+      // No AT CMD issue: report message
+      if( ESP8266_GetLastAtCmd() == ESP8266_CMD_ID_NONE )
+      {
+        ESP8266_AtReportHandler((uint8_t*)EspRxBuffer);
+      }
+      else
+      // Response to last AT command
+      {
+        ESP8266_AtResponseHandler( (uint8_t*)EspRxBuffer);
+      }
       osEventFlagsClear(EventComTaskHandle, ESP_EVENT_FLAG_MASK);
     }
     if( eventFlags |= VCP_EVENT_FLAG_MASK)
