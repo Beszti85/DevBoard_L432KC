@@ -41,7 +41,7 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       ptrTxBuffer += sizeof(BME280_PhysicalValues.Humidity);
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Pressure, sizeof(BME280_PhysicalValues.Pressure));
       ptrTxBuffer += sizeof(BME280_PhysicalValues.Pressure);
-      retval = 12u;
+      retval = 24u;
       break;
     // Read ADC data
     case ADC_PHY_VALUES:
