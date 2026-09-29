@@ -65,6 +65,9 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
     case DAC_OUTPUT:
       break;
     default:
+      // Unsupported read id: error code
+      ptrTxBuffer[0u] = 0xFEu;
+      retval = 1u;
       break;
   }
 
