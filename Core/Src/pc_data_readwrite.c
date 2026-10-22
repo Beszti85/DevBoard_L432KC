@@ -15,6 +15,7 @@ extern BME280_PhysValues_t BME280_PhysicalValues;
 extern FLASH_Handler_t FlashHandler;
 extern float ADC_Voltage[5u];
 extern uint32_t TIM1_PwmDutyCycle;
+extern MCP4725_Handle_s MCP4725_Handle;
 
 // Static module variables
 uint32_t PcExtFlashReadAddress = 0u;
@@ -63,6 +64,7 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       retval = 4u;
       break;
     case PC_WR_DAC_OUTPUT:
+      MCP4725_SetOutput( &MCP4725_Handle, (uint16_t)(ptrTxBuffer[1] << 8u) | (uint16_t)(ptrTxBuffer[2]), (MCP4725_WriteCmd_e)ptrTxBuffer[0] );
       break;
     default:
       // Unsupported read id: error code
