@@ -29,12 +29,12 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
   switch (readId)
   {
     // Read board name
-    case BOARD_ID:
+    case PC_RD_BOARD_ID:
       memcpy(ptrTxBuffer, "NucleoL432KC_DevBoard", sizeof("NucleoL432KC_DevBoard"));
       retval = sizeof("NucleoL432KC_DevBoard");
       break;
     // Read BME280 physical values
-    case BME280_PHYSICAL_VALUES:
+    case PC_RD_BME280_PHYSICAL_VALUES:
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Temperature, sizeof(BME280_PhysicalValues.Temperature));
       ptrTxBuffer += sizeof(BME280_PhysicalValues.Temperature);
       memcpy(ptrTxBuffer, &BME280_PhysicalValues.Humidity, sizeof(BME280_PhysicalValues.Humidity));
@@ -44,29 +44,29 @@ uint8_t PC_ReadDataHandler( uint8_t readId, uint8_t* ptrTxBuffer )
       retval = 24u;
       break;
     // Read ADC data
-    case ADC_PHY_VALUES:
+    case PC_RD_ADC_PHY_VALUES:
       memcpy(ptrTxBuffer, ADC_Voltage, sizeof(ADC_Voltage));
       retval = 20u;
       break;
     // Read Flash ID
-    case FLASH_ID:
+    case PC_RD_FLASH_ID:
       memcpy(ptrTxBuffer, &FlashHandler.DetectedFlash, sizeof(FlashHandler.DetectedFlash));
       retval = 1u;
       break;
     // Read Flash data
-    case FLASH_READ:
+    case PC_RD_FLASH_READ:
       FLASH_Read(&FlashHandler, PcExtFlashReadAddress, ptrTxBuffer, PcExtFlashReadLength);
       retval = PcExtFlashReadLength;
       break;
-    case LED_PWM:
+    case PC_RW_LED_PWM:
       memcpy(ptrTxBuffer, &TIM1_PwmDutyCycle, sizeof(TIM1_PwmDutyCycle));
       retval = 4u;
       break;
-    case DAC_OUTPUT:
+    case PC_WR_DAC_OUTPUT:
       break;
     default:
       // Unsupported read id: error code
-      ptrTxBuffer[0u] = 0xFEu;
+      ptrTxBuffer[0u] = DATA_ID_NOT_FOUND;
       retval = 1u;
       break;
   }
@@ -85,12 +85,13 @@ void PC_WriteDataHandler( uint8_t* ptrTxBuffer )
       memcpy(&PcExtFlashReadAddress, ptrTxBuffer, sizeof(PcExtFlashReadAddress));
       memcpy(&PcExtFlashReadLength, ptrTxBuffer + sizeof(PcExtFlashReadAddress), sizeof(PcExtFlashReadLength));
       break;
-    case LED_PWM:
+    case PC_RW_LED_PWM:
       memcpy(&TIM1_PwmDutyCycle, ptrTxBuffer, sizeof(TIM1_PwmDutyCycle)); 
       break;
-    case DAC_OUTPUT:
+    case PC_WR_DAC_OUTPUT:
       break;
     default:
+      ptrTxBuffer[0] = DATA_ID_NOT_FOUND;
       break;
   }
 }
